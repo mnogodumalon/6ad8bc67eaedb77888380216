@@ -1,0 +1,47 @@
+{
+  "KundenDialog.tsx": {
+    "firmenname": "z. B. Muster GmbH",
+    "branche": "z. B. Maschinenbau",
+    "strasse": "z. B. Hauptstraße",
+    "hausnummer": "z. B. 12a",
+    "plz": "z. B. 80331",
+    "ort": "z. B. München",
+    "email": "z. B. info@muster.de",
+    "website": "z. B. www.muster.de",
+    "bemerkungen": "Notizen zum Kunden"
+  },
+  "KontakteDialog.tsx": {
+    "vorname": "z. B. Anna",
+    "nachname": "z. B. Müller",
+    "kunde": "Welcher Kunde?",
+    "position": "z. B. Prüfleiter",
+    "email": "z. B. anna.mueller@firma.de"
+  },
+  "PruefgeraeteDialog.tsx": {
+    "bezeichnung": "z. B. Gasspürgerät GX-100",
+    "hersteller": "z. B. Dräger",
+    "typ": "z. B. Handmessgerät",
+    "seriennummer": "z. B. SN-2026-0042",
+    "preis": "z. B. 1499,00",
+    "kunde": "Welcher Kunde?",
+    "kaufdatum": "Wann wurde es gekauft?",
+    "zertifizierungsintervall": "z. B. 12"
+  },
+  "VeranstaltungenDialog.tsx": {
+    "titel": "z. B. Sommerfest 2026",
+    "beginn": "Wann beginnt die Veranstaltung?",
+    "ort": "z. B. Gemeindesaal",
+    "beschreibung": "Worum geht es?",
+    "max_teilnehmer": "z. B. 50"
+  },
+  "AnmeldungenDialog.tsx": {
+    "veranstaltung": "Welche Veranstaltung?",
+    "vorname": "z. B. Anna",
+    "nachname": "z. B. Müller",
+    "email": "z. B. anna.mueller@beispiel.de",
+    "firma": "z. B. Muster GmbH",
+    "kontakt": "Welcher Kontakt?",
+    "anmerkung": "Wünsche oder Hinweise",
+    "anmeldedatum": "Wann war die Anmeldung?"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "Kunden": {
+      "placeholders_set": 9,
+      "defaults_keys": [],
+      "computed_keys": [],
+      "reason": "Kunden sind reine Stammdaten ohne numerische Felder, daher keine Formeln; der Kundenstatus hat keinen eindeutigen Startstatus wie offen oder neu, daher kein Default."
+    },
+    "Kontakte": {
+      "placeholders_set": 5,
+      "defaults_keys": [],
+      "computed_keys": [],
+      "reason": "Reine Stammdaten ohne numerische Felder oder Datumspaare, daher keine Formeln."
+    },
+    "Prüfgeräte": {
+      "placeholders_set": 8,
+      "defaults_keys": [
+        "status",
+        "kaufdatum",
+        "zertifizierungsintervall"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formel, da Preis und Intervall keine rechnerische Kette bilden und kein Datumspaar vorhanden ist."
+    },
+    "Veranstaltungen": {
+      "placeholders_set": 5,
+      "defaults_keys": [
+        "beginn",
+        "status"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formeln, da nur ein einzelnes Datum und keine Preis- oder Mengenkette vorhanden ist."
+    },
+    "Anmeldungen": {
+      "placeholders_set": 8,
+      "defaults_keys": [
+        "anmeldestatus",
+        "anmeldedatum"
+      ],
+      "computed_keys": [],
+      "reason": "Keine Formel, da es kein Datumspaar und keine Preis- oder Mengenfelder gibt; die Teilnehmerzahl des Events ergibt keine sinnvolle Berechnung."
+    }
+  }
+}

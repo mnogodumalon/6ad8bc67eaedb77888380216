@@ -1,0 +1,326 @@
+{
+  "version": 1,
+  "language": "de",
+  "understanding": {
+    "summary": "Die Anwendung unterstützt den Verkauf von Prüfgeräten für kritische Messungen, etwa an Gasleitungen und Übergabepunkten. Sie verwaltet Kunden und Kontakte (einfaches CRM), die verkauften Geräte samt Zertifizierungsintervall sowie Verkaufsveranstaltungen, zu denen sich Interessenten anmelden.",
+    "roles": [
+      "Vertrieb",
+      "Geschäftsführung",
+      "Veranstaltungsorganisation"
+    ],
+    "main_tasks": [
+      "Kunden und Kontakte pflegen",
+      "Prüfgeräte verwalten und verkaufen",
+      "Zertifizierung der Geräte im Blick behalten",
+      "Veranstaltungen planen",
+      "Anmeldungen von Interessenten bearbeiten"
+    ],
+    "platform_roles": [
+      {
+        "persona": "Vertrieb",
+        "role": "standard",
+        "apps": [
+          "kunden",
+          "kontakte",
+          "pruefgeraete",
+          "anmeldungen",
+          "veranstaltungen"
+        ]
+      },
+      {
+        "persona": "Veranstaltungsorganisation",
+        "role": "datenverarbeitung",
+        "apps": [
+          "veranstaltungen",
+          "anmeldungen",
+          "kontakte"
+        ]
+      },
+      {
+        "persona": "Geschäftsführung",
+        "role": "administrator",
+        "apps": [
+          "kunden",
+          "kontakte",
+          "pruefgeraete",
+          "veranstaltungen",
+          "anmeldungen"
+        ]
+      }
+    ]
+  },
+  "flows": [
+    {
+      "slug": "geraet-verkaufen",
+      "label": {
+        "de": "Prüfgerät verkaufen",
+        "en": "Sell test device"
+      },
+      "description": "Ein verfügbares Prüfgerät wird einem Kunden zugeordnet, das Kaufdatum gesetzt und der Kunde ggf. zum Kunden gemacht.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "pruefgeraete",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "kunde": "picked",
+            "kaufdatum": "derived:today",
+            "status": "fixed:verkauft",
+            "preis": "user",
+            "zertifizierungsintervall": "user"
+          },
+          "needs": {}
+        },
+        {
+          "entity": "kunden",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "kundenstatus": "fixed:kunde"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `geraet-verkaufen` — Prüfgerät verkaufen\nEin verfügbares Prüfgerät wird einem Kunden zugeordnet, das Kaufdatum gesetzt und der Kunde ggf. zum Kunden gemacht.\n\n## Your hook — import it, never rebuild what it owns\n`import { useGeraetVerkaufenFlow } from '@/lib/journey/flows/GeraetVerkaufen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: kunde), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `pruefgeraete`: `{...flow.picks.pruefgeraete.select} {...flow.pick('pruefgeraete')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. This flow CHANGES a record of `kunden`: `{...flow.picks.kunden.select} {...flow.pick('kunden')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Verfügbares Prüfgerät auswählen\n2. Kunden auswählen\n3. Preis und Zertifizierungsintervall bestätigen\n4. Verkauf abschließen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- updates `pruefgeraete`:\n    - `kunde`: from the record the user picks in this flow\n    - `kaufdatum`: derived: today() — set it in the plan step, never ask\n    - `status`: fixed value `verkauft` — set it in the plan step's values, never ask\n    - `preis`: the user enters it (bind it through the layer: form.field/…)\n    - `zertifizierungsintervall`: the user enters it (bind it through the layer: form.field/…)\n- updates `kunden`:\n    - `kundenstatus`: fixed value `kunde` — set it in the plan step's values, never ask\n\n## Reads\n- `pruefgeraete` columns bezeichnung, hersteller, typ, seriennummer, preis, status\n- `kunden` columns firmenname, ort, kundenstatus\n\n## Checks BEFORE the write (block the submit with the message when they fail)\n- required_context (field=`pruefgeraete.kunde`) — message: „Bitte zuerst einen Kunden und ein verfügbares Prüfgerät auswählen.“\n\n## Success page\n- shows: `pruefgeraete.bezeichnung`, `pruefgeraete.kunde`, `pruefgeraete.kaufdatum`\n- next flows to offer: `kunde-anlegen`\n\n## Never write these — another flow or a tool owns them\n- `kunden.firmenname` (owner: intent `kunde-anlegen`)\n- `kunden.branche` (owner: intent `kunde-anlegen`)\n- `kunden.strasse` (owner: intent `kunde-anlegen`)\n- `kunden.hausnummer` (owner: intent `kunde-anlegen`)\n- `kunden.plz` (owner: intent `kunde-anlegen`)\n- `kunden.ort` (owner: intent `kunde-anlegen`)\n- `kunden.telefon` (owner: intent `kunde-anlegen`)\n- `kunden.email` (owner: intent `kunde-anlegen`)\n- `kontakte.vorname` (owner: intent `kunde-anlegen`)\n- `kontakte.nachname` (owner: intent `kunde-anlegen`)\n- `kontakte.kunde` (owner: intent `kunde-anlegen`)\n- `kontakte.position` (owner: intent `kunde-anlegen`)\n- `kontakte.email` (owner: intent `kunde-anlegen`)\n- `kontakte.telefon` (owner: intent `kunde-anlegen`)\n- `kontakte.ist_anwender` (owner: intent `kunde-anlegen`)\n- `anmeldungen.veranstaltung` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.vorname` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.nachname` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.email` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.telefon` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.firma` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.kontakt` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.anmeldestatus` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.anmeldedatum` (owner: intent `anmeldung-erfassen`)\n- `veranstaltungen.status` (owner: tool `veranstaltung-ausbuchen`)\n"
+    },
+    {
+      "slug": "kunde-anlegen",
+      "label": {
+        "de": "Kunde mit Kontakt anlegen",
+        "en": "Create customer with contact"
+      },
+      "description": "Legt einen Kunden oder Interessenten zusammen mit seinem ersten Ansprechpartner an.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "kunden",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "firmenname": "user",
+            "branche": "user",
+            "strasse": "user",
+            "hausnummer": "user",
+            "plz": "user",
+            "ort": "user",
+            "telefon": "user",
+            "email": "user",
+            "kundenstatus": "user"
+          },
+          "needs": {}
+        },
+        {
+          "entity": "kontakte",
+          "op": "create",
+          "when": "optional",
+          "fields": {
+            "vorname": "user",
+            "nachname": "user",
+            "kunde": "picked",
+            "position": "user",
+            "email": "user",
+            "telefon": "user",
+            "ist_anwender": "user"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `kunde-anlegen` — Kunde mit Kontakt anlegen\nLegt einen Kunden oder Interessenten zusammen mit seinem ersten Ansprechpartner an.\n\n## Your hook — import it, never rebuild what it owns\n`import { useKundeAnlegenFlow } from '@/lib/journey/flows/KundeAnlegen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: kunde), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Firmendaten erfassen\n2. Kundenstatus wählen\n3. Ansprechpartner erfassen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `kunden`:\n    - `firmenname`: the user enters it (bind it through the layer: form.field/…)\n    - `branche`: the user enters it (bind it through the layer: form.field/…)\n    - `strasse`: the user enters it (bind it through the layer: form.field/…)\n    - `hausnummer`: the user enters it (bind it through the layer: form.field/…)\n    - `plz`: the user enters it (bind it through the layer: form.field/…)\n    - `ort`: the user enters it (bind it through the layer: form.field/…)\n    - `telefon`: the user enters it (bind it through the layer: form.field/…)\n    - `email`: the user enters it (bind it through the layer: form.field/…)\n    - `kundenstatus`: the user enters it (bind it through the layer: form.field/…)\n- creates `kontakte` (only when the flow needs it):\n    - `vorname`: the user enters it (bind it through the layer: form.field/…)\n    - `nachname`: the user enters it (bind it through the layer: form.field/…)\n    - `kunde`: from the record the user picks in this flow\n    - `position`: the user enters it (bind it through the layer: form.field/…)\n    - `email`: the user enters it (bind it through the layer: form.field/…)\n    - `telefon`: the user enters it (bind it through the layer: form.field/…)\n    - `ist_anwender`: the user enters it (bind it through the layer: form.field/…)\n\n## Success page\n- shows: `kunden.firmenname`, `kontakte.nachname`\n- next flows to offer: `geraet-verkaufen`\n\n## Never write these — another flow or a tool owns them\n- `pruefgeraete.kunde` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.kaufdatum` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.status` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.preis` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.zertifizierungsintervall` (owner: intent `geraet-verkaufen`)\n- `anmeldungen.veranstaltung` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.vorname` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.nachname` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.email` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.telefon` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.firma` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.kontakt` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.anmeldestatus` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.anmeldedatum` (owner: intent `anmeldung-erfassen`)\n- `veranstaltungen.status` (owner: tool `veranstaltung-ausbuchen`)\n"
+    },
+    {
+      "slug": "anmeldung-erfassen",
+      "label": {
+        "de": "Anmeldung zur Veranstaltung erfassen",
+        "en": "Register for event"
+      },
+      "description": "Erfasst eine Anmeldung zu einer Veranstaltung mit Platzprüfung und setzt Warteliste, wenn ausgebucht.",
+      "priority": "must",
+      "writes": [
+        {
+          "entity": "anmeldungen",
+          "op": "create",
+          "when": "always",
+          "fields": {
+            "veranstaltung": "picked",
+            "vorname": "user",
+            "nachname": "user",
+            "email": "user",
+            "telefon": "user",
+            "firma": "user",
+            "kontakt": "picked",
+            "anmeldestatus": "fixed:angemeldet",
+            "anmeldedatum": "derived:today"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `anmeldung-erfassen` — Anmeldung zur Veranstaltung erfassen\nErfasst eine Anmeldung zu einer Veranstaltung mit Platzprüfung und setzt Warteliste, wenn ausgebucht.\n\n## Your hook — import it, never rebuild what it owns\n`import { useAnmeldungErfassenFlow } from '@/lib/journey/flows/AnmeldungErfassen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick: veranstaltung, kontakt), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Veranstaltung mit freien Plätzen wählen\n2. Teilnehmerdaten erfassen\n3. Ggf. bestehenden Kontakt zuordnen\n4. Anmeldung speichern\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- creates `anmeldungen`:\n    - `veranstaltung`: from the record the user picks in this flow\n    - `vorname`: the user enters it (bind it through the layer: form.field/…)\n    - `nachname`: the user enters it (bind it through the layer: form.field/…)\n    - `email`: the user enters it (bind it through the layer: form.field/…)\n    - `telefon`: the user enters it (bind it through the layer: form.field/…)\n    - `firma`: the user enters it (bind it through the layer: form.field/…)\n    - `kontakt`: from the record the user picks in this flow\n    - `anmeldestatus`: fixed value `angemeldet` — set it in the plan step's values, never ask\n    - `anmeldedatum`: derived: today() — set it in the plan step, never ask\n\n## Reads\n- `veranstaltungen` columns titel, beginn, ort, max_teilnehmer, status\n- `kontakte` columns vorname, nachname, email\n\n## Checks BEFORE the write (block the submit with the message when they fail)\n- unique (field=`anmeldungen.email`, resource=`anmeldungen.veranstaltung`) — message: „Diese E-Mail-Adresse ist für die Veranstaltung bereits angemeldet.“\n\n## Success page\n- shows: `anmeldungen.veranstaltung`, `anmeldungen.nachname`, `anmeldungen.anmeldestatus`\n- next flows to offer: `anmeldung-bestaetigen`\n\n## Never write these — another flow or a tool owns them\n- `pruefgeraete.kunde` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.kaufdatum` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.status` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.preis` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.zertifizierungsintervall` (owner: intent `geraet-verkaufen`)\n- `kunden.kundenstatus` (owner: intent `geraet-verkaufen`)\n- `kunden.firmenname` (owner: intent `kunde-anlegen`)\n- `kunden.branche` (owner: intent `kunde-anlegen`)\n- `kunden.strasse` (owner: intent `kunde-anlegen`)\n- `kunden.hausnummer` (owner: intent `kunde-anlegen`)\n- `kunden.plz` (owner: intent `kunde-anlegen`)\n- `kunden.ort` (owner: intent `kunde-anlegen`)\n- `kunden.telefon` (owner: intent `kunde-anlegen`)\n- `kunden.email` (owner: intent `kunde-anlegen`)\n- `kontakte.vorname` (owner: intent `kunde-anlegen`)\n- `kontakte.nachname` (owner: intent `kunde-anlegen`)\n- `kontakte.kunde` (owner: intent `kunde-anlegen`)\n- `kontakte.position` (owner: intent `kunde-anlegen`)\n- `kontakte.email` (owner: intent `kunde-anlegen`)\n- `kontakte.telefon` (owner: intent `kunde-anlegen`)\n- `kontakte.ist_anwender` (owner: intent `kunde-anlegen`)\n- `veranstaltungen.status` (owner: tool `veranstaltung-ausbuchen`)\n"
+    },
+    {
+      "slug": "anmeldung-bestaetigen",
+      "label": {
+        "de": "Anmeldung bestätigen",
+        "en": "Confirm registration"
+      },
+      "description": "Setzt eine offene Anmeldung auf bestätigt oder Warteliste.",
+      "priority": "nice",
+      "writes": [
+        {
+          "entity": "anmeldungen",
+          "op": "update",
+          "when": "always",
+          "fields": {
+            "anmeldestatus": "user"
+          },
+          "needs": {}
+        }
+      ],
+      "required": [],
+      "brief": "# Flow `anmeldung-bestaetigen` — Anmeldung bestätigen\nSetzt eine offene Anmeldung auf bestätigt oder Warteliste.\n\n## Your hook — import it, never rebuild what it owns\n`import { useAnmeldungBestaetigenFlow } from '@/lib/journey/flows/AnmeldungBestaetigen';` — generated from the Schreibliste below. It OWNS the form(s), one record search per picked field (columns and filter from the plan) and the submit plan with every fixed and derived value. You compose: `flow.forms.<entity>` for <Bound>/<Field>, `{...flow.picks.<field>.select} {...flow.pick('<field>')}` (or `flow.pickMany` for a multi pick) for <EntitySelectStep>, `flow.validateStep(n)` in StepNav.onNext, `flow.submit` + `flow.formList` for SummaryStep/SuccessStep, `flow.reset()`; what the hook does not own reads through its door `flow.port` — availability `useOccupancy(flow.port, '<entity>', { resource })`, a count `useRecordCount(flow.port, …)` — never import servicePort next to the hook. Options: `steps` (field → step), `items` (how a hit reads, per pick), `initial`, `messages`. The hook's docblock in .lane-context.md shows the exact call. This flow CHANGES a record of `anmeldungen`: `{...flow.picks.anmeldungen.select} {...flow.pick('anmeldungen')}` picks it, the hook prefills the form with its current values and updates THAT record — never a create step, never a list from useDashboardData. Never import servicePort, useStepForm, useJourneySubmit, useRecordSearch or useDashboardData in this page — check-intents refuses a page that uses the hook and any of them.\n\n## Steps (in this order)\n1. Offene Anmeldung wählen\n2. Bestätigen oder auf Warteliste setzen\n\n## Schreibliste — the ONLY writes this flow makes (the gate compares your plan steps with this list)\n- updates `anmeldungen`:\n    - `anmeldestatus`: the user enters it (bind it through the layer: form.field/…)\n\n## Reads\n- `anmeldungen` columns veranstaltung, vorname, nachname, email, anmeldestatus\n\n## Success page\n- shows: `anmeldungen.anmeldestatus`\n\n## Never write these — another flow or a tool owns them\n- `pruefgeraete.kunde` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.kaufdatum` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.status` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.preis` (owner: intent `geraet-verkaufen`)\n- `pruefgeraete.zertifizierungsintervall` (owner: intent `geraet-verkaufen`)\n- `kunden.kundenstatus` (owner: intent `geraet-verkaufen`)\n- `kunden.firmenname` (owner: intent `kunde-anlegen`)\n- `kunden.branche` (owner: intent `kunde-anlegen`)\n- `kunden.strasse` (owner: intent `kunde-anlegen`)\n- `kunden.hausnummer` (owner: intent `kunde-anlegen`)\n- `kunden.plz` (owner: intent `kunde-anlegen`)\n- `kunden.ort` (owner: intent `kunde-anlegen`)\n- `kunden.telefon` (owner: intent `kunde-anlegen`)\n- `kunden.email` (owner: intent `kunde-anlegen`)\n- `kontakte.vorname` (owner: intent `kunde-anlegen`)\n- `kontakte.nachname` (owner: intent `kunde-anlegen`)\n- `kontakte.kunde` (owner: intent `kunde-anlegen`)\n- `kontakte.position` (owner: intent `kunde-anlegen`)\n- `kontakte.email` (owner: intent `kunde-anlegen`)\n- `kontakte.telefon` (owner: intent `kunde-anlegen`)\n- `kontakte.ist_anwender` (owner: intent `kunde-anlegen`)\n- `anmeldungen.veranstaltung` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.vorname` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.nachname` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.email` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.telefon` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.firma` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.kontakt` (owner: intent `anmeldung-erfassen`)\n- `anmeldungen.anmeldedatum` (owner: intent `anmeldung-erfassen`)\n- `veranstaltungen.status` (owner: tool `veranstaltung-ausbuchen`)\n"
+    }
+  ],
+  "public_pages": [
+    {
+      "slug": "veranstaltung-anmeldung",
+      "purpose": "Interessenten sehen die Veranstaltungen mit offener Anmeldung (Titel, Datum, Ort, Beschreibung, maximale Teilnehmerzahl) und melden sich online an. Es werden keine Daten anderer Teilnehmer gezeigt. Die Anmeldung wird als angemeldet mit dem heutigen Datum gespeichert.",
+      "publish": true,
+      "lists": [
+        {
+          "entity": "veranstaltungen",
+          "columns": [
+            "titel",
+            "beginn",
+            "ort",
+            "beschreibung",
+            "max_teilnehmer"
+          ],
+          "filter": {
+            "mode": "all",
+            "conditions": [
+              {
+                "field": "status",
+                "op": "eq",
+                "value": "anmeldung_offen"
+              }
+            ]
+          },
+          "max_records": null
+        }
+      ],
+      "creates": [
+        {
+          "entity": "anmeldungen",
+          "fields": {
+            "veranstaltung": "picked",
+            "vorname": "user",
+            "nachname": "user",
+            "email": "user",
+            "telefon": "user",
+            "firma": "user",
+            "anmerkung": "user"
+          },
+          "fixed": {
+            "anmeldestatus": "angemeldet"
+          }
+        }
+      ],
+      "brief": "# Public page `veranstaltung-anmeldung`\nInteressenten sehen die Veranstaltungen mit offener Anmeldung (Titel, Datum, Ort, Beschreibung, maximale Teilnehmerzahl) und melden sich online an. Es werden keine Daten anderer Teilnehmer gezeigt. Die Anmeldung wird als angemeldet mit dem heutigen Datum gespeichert.\n\n## Lists (declare exactly these in the surface)\n- `veranstaltungen`: columns `titel`, `beginn`, `ort`, `beschreibung`, `max_teilnehmer`, filter {\"mode\": \"all\", \"conditions\": [{\"field\": \"status\", \"op\": \"eq\", \"value\": \"anmeldung_offen\"}]}\n\n## Creates (declare exactly these in the surface)\n- `anmeldungen`: visitor fields `veranstaltung`, `vorname`, `nachname`, `email`, `telefon`, `firma`, `anmerkung`; preset_fields {\"anmeldestatus\": \"angemeldet\"}\n\n## Availability — mechanical, write nothing for it\nA picker (`useRecordSearch`) never offers a record another record already takes (a booked slot) — the layer leaves it out. To SHOW booked periods, call `useOccupancy(port, '<entity>')` and hand `blocked` to AvailabilityRangePicker; the integration gives the page exactly that read (dates or the reference, never who booked). Never declare a list of bookings with names or contacts to work availability out yourself.\n\nPublish: yes\n"
+    }
+  ],
+  "tools": [
+    {
+      "id": "zertifizierung-pruefen",
+      "purpose": "Täglich Prüfgeräte mit Status verkauft prüfen, deren Kaufdatum plus Zertifizierungsintervall in Monaten erreicht ist, und sie auf In Prüfung setzen. Geräte ohne Kaufdatum oder Intervall werden übersprungen."
+    },
+    {
+      "id": "zertifizierung-digest",
+      "purpose": "Täglich eine Sammelmail an den Schlüsselinhaber mit allen Prüfgeräten, die auf In Prüfung stehen, damit Zertifizierungstermine organisiert werden. Schreibt keine Datensätze."
+    },
+    {
+      "id": "veranstaltung-ausbuchen",
+      "purpose": "Bei Änderung oder Neuanlage einer Anmeldung zählt das Werkzeug die nicht abgesagten Anmeldungen der Veranstaltung. Ist die maximale Teilnehmerzahl erreicht, wird die Veranstaltung auf Ausgebucht gesetzt. Prüft den Status im Code."
+    },
+    {
+      "id": "anmeldedatum-setzen",
+      "purpose": "Setzt bei neuen Anmeldungen ohne Datum das heutige Datum als Anmeldedatum, falls Flow oder Seite es nicht gesetzt haben."
+    }
+  ],
+  "covered_by_platform": [
+    {
+      "wish": "Dokument zum Hochladen bei Kundenaktivität",
+      "feature": "record_attachments"
+    },
+    {
+      "wish": "Grundlegende CRM-Funktionen: Kunden und Kontakte durchsuchen und bearbeiten",
+      "feature": "search_filter"
+    },
+    {
+      "wish": "Zugriff je Benutzergruppe",
+      "feature": "user_roles"
+    },
+    {
+      "wish": "Übersicht der Geräte je Status",
+      "feature": "distribution_view"
+    }
+  ],
+  "ownership": {
+    "pruefgeraete": {
+      "kunde": "intent:geraet-verkaufen",
+      "kaufdatum": "intent:geraet-verkaufen",
+      "status": "tool:zertifizierung-pruefen",
+      "preis": "intent:geraet-verkaufen",
+      "zertifizierungsintervall": "intent:geraet-verkaufen"
+    },
+    "kunden": {
+      "kundenstatus": "intent:kunde-anlegen",
+      "firmenname": "intent:kunde-anlegen",
+      "branche": "intent:kunde-anlegen",
+      "strasse": "intent:kunde-anlegen",
+      "hausnummer": "intent:kunde-anlegen",
+      "plz": "intent:kunde-anlegen",
+      "ort": "intent:kunde-anlegen",
+      "telefon": "intent:kunde-anlegen",
+      "email": "intent:kunde-anlegen"
+    },
+    "kontakte": {
+      "vorname": "intent:kunde-anlegen",
+      "nachname": "intent:kunde-anlegen",
+      "kunde": "intent:kunde-anlegen",
+      "position": "intent:kunde-anlegen",
+      "email": "intent:kunde-anlegen",
+      "telefon": "intent:kunde-anlegen",
+      "ist_anwender": "intent:kunde-anlegen"
+    },
+    "anmeldungen": {
+      "veranstaltung": "intent:anmeldung-erfassen",
+      "vorname": "intent:anmeldung-erfassen",
+      "nachname": "intent:anmeldung-erfassen",
+      "email": "intent:anmeldung-erfassen",
+      "telefon": "intent:anmeldung-erfassen",
+      "firma": "intent:anmeldung-erfassen",
+      "kontakt": "intent:anmeldung-erfassen",
+      "anmeldestatus": "intent:anmeldung-bestaetigen",
+      "anmeldedatum": "tool:anmeldedatum-setzen"
+    },
+    "veranstaltungen": {
+      "status": "tool:veranstaltung-ausbuchen"
+    }
+  },
+  "dashboard": {
+    "focus": [
+      "Prüfgeräte nach Status",
+      "Kommende Veranstaltungen",
+      "Offene Anmeldungen",
+      "Kunden nach Kundenstatus"
+    ],
+    "hints": [
+      "Geräte mit anstehender Zertifizierung hervorheben",
+      "Freie Plätze der nächsten Veranstaltung zeigen"
+    ],
+    "wishes": []
+  }
+}

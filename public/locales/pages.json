@@ -1,0 +1,37 @@
+{
+  "pages": {
+    "en": {
+      "Alle Zertifizierungen im Plan, keine offenen Anmeldungen.": "All certifications on schedule, no open registrations.",
+      "Alles bearbeitet — nächste Veranstaltung: {0}": "All processed — next event: {0}",
+      "Alles bearbeitet.": "All processed.",
+      "Anmeldung bestätigen": "Confirm registration",
+      "Anmeldung erfassen": "Add registration",
+      "Bei {0} ist die Zertifizierung überfällig.": "{0} has an overdue certification.",
+      "Bestätigen": "Confirm",
+      "Freie Plätze nächste Veranstaltung": "Available spots next event",
+      "Keine Veranstaltung geplant.": "No event scheduled.",
+      "Kommende Veranstaltungen": "Upcoming events",
+      "Kunden nach Status": "Customers by status",
+      "Neu": "New",
+      "Neues Prüfgerät": "New test device",
+      "Nächste Veranstaltung: {0} am {1} — {2} Plätze frei.": "Next event: {0} on {1} — {2} spots available.",
+      "Nächste Veranstaltung: {0} am {1}.": "Next event: {0} on {1}.",
+      "Offene Anmeldungen": "Open registrations",
+      "Richte deinen Vertrieb ein — starte mit dem ersten Prüfgerät.": "Set up your sales — start with your first test device.",
+      "Veranstaltung planen": "Schedule event",
+      "Zertifizierung bis {0}": "Certification until {0}",
+      "Zertifizierung in {0} Tagen": "Certification in {0} days",
+      "Zertifizierung seit {0} fällig": "Certification due since {0}",
+      "Zertifizierung überfällig — ältester Termin war {0}.": "Certification overdue — oldest due date was {0}.",
+      "Zur Prüfung vormerken": "Flag for review",
+      "ausgebucht": "fully booked",
+      "{0} Plätze frei": "{0} spots available",
+      "{0} warten auf eine Rückmeldung zur Anmeldung.": "{0} awaiting a response to their registration.",
+      "{0} — Status geändert": "{0} — status changed",
+      "{0} — Veranstaltung ausgebucht, auf Warteliste gesetzt": "{0} — event fully booked, added to waitlist",
+      "{0} — bestätigt": "{0} — confirmed",
+      "{0} — zur Prüfung vorgemerkt": "{0} — flagged for review"
+    }
+  },
+  "v": 1
+}
