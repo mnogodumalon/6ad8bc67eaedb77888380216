@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "pages": [
+    {
+      "slug": "veranstaltung-anmeldung",
+      "component": "VeranstaltungAnmeldung",
+      "title": "Zur Veranstaltung anmelden",
+      "endpoints": [
+        {
+          "entity": "veranstaltungen",
+          "op": "list",
+          "fields": [
+            "titel",
+            "beginn",
+            "ort",
+            "beschreibung",
+            "max_teilnehmer"
+          ],
+          "scope": "r.v_status == 'anmeldung_offen'",
+          "scope_description": "zeigt nur Veranstaltungen mit Status „Anmeldung offen“",
+          "max_records": 100
+        },
+        {
+          "entity": "anmeldungen",
+          "op": "create",
+          "fields": [
+            "veranstaltung",
+            "vorname",
+            "nachname",
+            "email",
+            "telefon",
+            "firma",
+            "anmerkung"
+          ],
+          "preset_fields": {
+            "anmeldestatus": "angemeldet"
+          }
+        }
+      ]
+    }
+  ]
+}

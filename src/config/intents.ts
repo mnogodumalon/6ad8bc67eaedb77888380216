@@ -20,6 +20,7 @@
 import type { ComponentType } from 'react';
 
 // <custom:intent-imports>
+import { IconShoppingCart, IconUserPlus, IconCalendarPlus, IconChecks } from '@tabler/icons-react';
 // </custom:intent-imports>
 
 export interface IntentLink {
@@ -42,6 +43,10 @@ export interface IntentLink {
 
 export const INTENTS: IntentLink[] = [
   // <custom:intents>
+  { path: '/intents/geraet-verkaufen', label: { de: 'Prüfgerät verkaufen', en: 'Sell test device' }, icon: IconShoppingCart, description: 'Ein verfügbares Prüfgerät wird einem Kunden zugeordnet, das Kaufdatum gesetzt und der Kunde ggf. zum Kunden gemacht.' },
+  { path: '/intents/kunde-anlegen', label: { de: 'Kunde mit Kontakt anlegen', en: 'Create customer with contact' }, icon: IconUserPlus, description: 'Legt einen Kunden oder Interessenten zusammen mit seinem ersten Ansprechpartner an.' },
+  { path: '/intents/anmeldung-erfassen', label: { de: 'Anmeldung zur Veranstaltung erfassen', en: 'Register for event' }, icon: IconCalendarPlus, description: 'Erfasst eine Anmeldung zu einer Veranstaltung mit Platzprüfung und setzt Warteliste, wenn ausgebucht.' },
+  { path: '/intents/anmeldung-bestaetigen', label: { de: 'Anmeldung bestätigen', en: 'Confirm registration' }, icon: IconChecks, description: 'Setzt eine offene Anmeldung auf bestätigt oder Warteliste.' },
   // </custom:intents>
 ];
 
@@ -52,7 +57,7 @@ export const INTENTS: IntentLink[] = [
  * purpose — a scaffold update resets it to false (self-healing if Phase 2
  * never ran).
  */
-export const INTENTS_PENDING = true;
+export const INTENTS_PENDING = false;
 
 /**
  * When the Phase-1 bundle was deployed (ISO, set by the service together with
